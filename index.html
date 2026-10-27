@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EV Market Performance & Insights</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f7f9;--card:#fff;--text:#1a1d23;--muted:#6b7280;--accent:#2563eb;--track:#e5e7eb}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1218;--card:#181d27;--text:#e8ebf0;--muted:#9aa3b2;--accent:#5b9bff;--track:#2a3140;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1218;--card:#181d27;--text:#e8ebf0;--muted:#9aa3b2;--accent:#5b9bff;--track:#2a3140;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;max-width:1000px;margin-inline:auto}
+h1{font-size:1.3rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+button{border:1px solid var(--track);background:var(--card);color:var(--text);padding:6px 12px;border-radius:999px;font-size:.85rem;cursor:pointer}
+button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}.kpi b{font-size:1.1rem}
+.kpi,.card{background:var(--card);border-radius:12px;padding:12px 14px}
+.kpi b{display:block;font-size:1.3rem;margin-top:2px}
+.kpi span{color:var(--muted);font-size:.78rem}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(5,1fr)}.grid{grid-template-columns:1fr 1fr}}
+h2{font-size:.95rem;margin:0 0 10px}
+.row{display:grid;grid-template-columns:92px 1fr 52px;align-items:center;gap:8px;font-size:.8rem;margin:5px 0}
+.row .t{background:var(--track);border-radius:4px;height:12px;overflow:hidden}
+.row .f{background:var(--accent);height:100%;border-radius:4px}
+.row .v{text-align:right;color:var(--muted)}
+.note{color:var(--muted);font-size:.75rem;margin-top:14px}
+</style>
+</head>
+<body>
+<h1>⚡ EV Market Performance & Insights</h1>
+<div class="sub">Interactive dashboard · tap a category to filter</div>
+<div class="filters" id="filters"></div>
+<div class="filters" id="yfilters"></div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+<div class="card"><h2>Annual sales by category (k units)</h2><div id="c1"></div></div>
+<div class="card"><h2>Manufacturer market share (%)</h2><div id="c2"></div></div>
+<div class="card"><h2>Battery technology share (k units)</h2><div id="c3"></div></div>
+<div class="card"><h2>Avg driving range by category (km)</h2><div id="c4"></div></div>
+<div class="card"><h2>Sales by manufacturing country (k units)</h2><div id="c5"></div></div>
+<div class="card"><h2>Avg customer rating by category (/5)</h2><div id="c6"></div></div>
+<div class="card"><h2>Sales growth by year (k units)</h2><div id="c7"></div></div>
+<div class="card"><h2>Avg battery capacity by category (kWh)</h2><div id="c8"></div></div>
+</div>
+<p class="note">Data: ev_market_data.csv (2023-2025, synthetic/illustrative).</p>
+<script>
+const D=[{"m":"Tesla","c":"Sedan","b":"NCA","k":"USA","y":"2023","s":119.5,"p":94,"r":448,"q":4.3},{"m":"Tesla","c":"Sedan","b":"NCA","k":"USA","y":"2024","s":196.5,"p":65,"r":439,"q":4.5},{"m":"Tesla","c":"Sedan","b":"NMC","k":"USA","y":"2025","s":154.4,"p":96,"r":445,"q":4.3},{"m":"Tesla","c":"SUV","b":"NCA","k":"USA","y":"2023","s":144.0,"p":102,"r":547,"q":4.4},{"m":"Tesla","c":"SUV","b":"NCA","k":"USA","y":"2024","s":144.1,"p":91,"r":474,"q":4.3},{"m":"Tesla","c":"SUV","b":"NCA","k":"USA","y":"2025","s":171.3,"p":102,"r":426,"q":4.5},{"m":"Tesla","c":"Truck","b":"NCA","k":"USA","y":"2023","s":114.5,"p":129,"r":395,"q":4.3},{"m":"Tesla","c":"Truck","b":"NMC","k":"USA","y":"2024","s":165.6,"p":127,"r":499,"q":4.8},{"m":"Tesla","c":"Truck","b":"NCA","k":"USA","y":"2025","s":170.9,"p":95,"r":442,"q":4.5},{"m":"BYD","c":"Hatchback","b":"LFP","k":"China","y":"2023","s":163.9,"p":59,"r":373,"q":4.6},{"m":"BYD","c":"Hatchback","b":"LFP","k":"China","y":"2024","s":155.1,"p":55,"r":338,"q":4.3},{"m":"BYD","c":"Hatchback","b":"LFP","k":"China","y":"2025","s":167.0,"p":62,"r":387,"q":4.2},{"m":"BYD","c":"Sedan","b":"LFP","k":"China","y":"2023","s":158.9,"p":77,"r":453,"q":4.3},{"m":"BYD","c":"Sedan","b":"LFP","k":"China","y":"2024","s":140.4,"p":96,"r":595,"q":4.6},{"m":"BYD","c":"Sedan","b":"LFP","k":"China","y":"2025","s":181.3,"p":82,"r":601,"q":4.0},{"m":"BYD","c":"SUV","b":"LFP","k":"China","y":"2023","s":122.6,"p":68,"r":526,"q":4.1},{"m":"BYD","c":"SUV","b":"LFP","k":"China","y":"2024","s":179.0,"p":96,"r":500,"q":4.0},{"m":"BYD","c":"SUV","b":"LFP","k":"China","y":"2025","s":195.4,"p":100,"r":510,"q":4.2},{"m":"BYD","c":"Bus","b":"LFP","k":"China","y":"2023","s":132.6,"p":238,"r":279,"q":4.0},{"m":"BYD","c":"Bus","b":"LFP","k":"China","y":"2024","s":171.2,"p":350,"r":312,"q":4.1},{"m":"BYD","c":"Bus","b":"LFP","k":"China","y":"2025","s":161.8,"p":344,"r":328,"q":4.2},{"m":"Volkswagen","c":"Hatchback","b":"NMC","k":"Germany","y":"2023","s":143.7,"p":64,"r":416,"q":4.4},{"m":"Volkswagen","c":"Hatchback","b":"NMC","k":"Germany","y":"2024","s":162.2,"p":52,"r":402,"q":3.9},{"m":"Volkswagen","c":"Hatchback","b":"NMC","k":"Germany","y":"2025","s":149.3,"p":54,"r":353,"q":3.9},{"m":"Volkswagen","c":"SUV","b":"NMC","k":"Germany","y":"2023","s":106.1,"p":74,"r":545,"q":4.1},{"m":"Volkswagen","c":"SUV","b":"NMC","k":"Germany","y":"2024","s":170.3,"p":104,"r":453,"q":4.0},{"m":"Volkswagen","c":"SUV","b":"NMC","k":"Germany","y":"2025","s":214.0,"p":72,"r":521,"q":3.9},{"m":"Hyundai","c":"SUV","b":"NMC","k":"South Korea","y":"2023","s":114.7,"p":84,"r":523,"q":4.2},{"m":"Hyundai","c":"SUV","b":"NMC","k":"South Korea","y":"2024","s":101.8,"p":109,"r":522,"q":4.2},{"m":"Hyundai","c":"SUV","b":"NMC","k":"South Korea","y":"2025","s":147.2,"p":109,"r":437,"q":4.4},{"m":"Hyundai","c":"Sedan","b":"NMC","k":"South Korea","y":"2023","s":91.6,"p":76,"r":608,"q":4.4},{"m":"Hyundai","c":"Sedan","b":"NMC","k":"South Korea","y":"2024","s":111.7,"p":94,"r":566,"q":4.6},{"m":"Hyundai","c":"Sedan","b":"NMC","k":"South Korea","y":"2025","s":114.3,"p":85,"r":491,"q":4.5},{"m":"Kia","c":"SUV","b":"NMC","k":"South Korea","y":"2023","s":78.9,"p":66,"r":407,"q":4.6},{"m":"Kia","c":"SUV","b":"NMC","k":"South Korea","y":"2024","s":83.6,"p":87,"r":514,"q":4.7},{"m":"Kia","c":"SUV","b":"NMC","k":"South Korea","y":"2025","s":96.4,"p":77,"r":520,"q":4.3},{"m":"Kia","c":"Sedan","b":"NMC","k":"South Korea","y":"2023","s":96.7,"p":82,"r":552,"q":4.6},{"m":"Kia","c":"Sedan","b":"NMC","k":"South Korea","y":"2024","s":97.1,"p":90,"r":481,"q":4.6},{"m":"Kia","c":"Sedan","b":"NMC","k":"South Korea","y":"2025","s":115.3,"p":89,"r":531,"q":4.3},{"m":"BMW","c":"Sedan","b":"NMC","k":"Germany","y":"2023","s":81.9,"p":61,"r":462,"q":4.3},{"m":"BMW","c":"Sedan","b":"NMC","k":"Germany","y":"2024","s":98.0,"p":98,"r":586,"q":4.8},{"m":"BMW","c":"Sedan","b":"NMC","k":"Germany","y":"2025","s":91.8,"p":60,"r":435,"q":4.7},{"m":"BMW","c":"SUV","b":"NMC","k":"Germany","y":"2023","s":61.5,"p":77,"r":511,"q":4.7},{"m":"BMW","c":"SUV","b":"NMC","k":"Germany","y":"2024","s":73.0,"p":80,"r":528,"q":4.7},{"m":"BMW","c":"SUV","b":"NMC","k":"Germany","y":"2025","s":96.3,"p":87,"r":415,"q":4.7},{"m":"Mercedes-Benz","c":"Sedan","b":"NMC","k":"Germany","y":"2023","s":64.2,"p":68,"r":558,"q":4.6},{"m":"Mercedes-Benz","c":"Sedan","b":"NMC","k":"Germany","y":"2024","s":53.2,"p":98,"r":476,"q":4.3},{"m":"Mercedes-Benz","c":"Sedan","b":"NMC","k":"Germany","y":"2025","s":67.6,"p":67,"r":588,"q":4.6},{"m":"Mercedes-Benz","c":"SUV","b":"NMC","k":"Germany","y":"2023","s":55.0,"p":100,"r":427,"q":4.3},{"m":"Mercedes-Benz","c":"SUV","b":"NMC","k":"Germany","y":"2024","s":51.9,"p":93,"r":529,"q":4.6},{"m":"Mercedes-Benz","c":"SUV","b":"NMC","k":"Germany","y":"2025","s":90.3,"p":104,"r":483,"q":4.9},{"m":"Nio","c":"Sedan","b":"Solid-State","k":"China","y":"2023","s":36.2,"p":92,"r":585,"q":4.3},{"m":"Nio","c":"Sedan","b":"Solid-State","k":"China","y":"2024","s":56.1,"p":72,"r":613,"q":4.5},{"m":"Nio","c":"Sedan","b":"Solid-State","k":"China","y":"2025","s":45.1,"p":64,"r":550,"q":4.4},{"m":"Nio","c":"SUV","b":"Solid-State","k":"China","y":"2023","s":35.6,"p":74,"r":471,"q":4.6},{"m":"Nio","c":"SUV","b":"Solid-State","k":"China","y":"2024","s":45.9,"p":94,"r":475,"q":4.1},{"m":"Nio","c":"SUV","b":"Solid-State","k":"China","y":"2025","s":55.0,"p":107,"r":481,"q":4.5},{"m":"Tata","c":"Hatchback","b":"NMC","k":"India","y":"2023","s":47.2,"p":53,"r":386,"q":3.8},{"m":"Tata","c":"Hatchback","b":"LFP","k":"India","y":"2024","s":63.8,"p":57,"r":386,"q":4.0},{"m":"Tata","c":"Hatchback","b":"NMC","k":"India","y":"2025","s":66.8,"p":42,"r":431,"q":3.8},{"m":"Tata","c":"SUV","b":"LFP","k":"India","y":"2023","s":47.7,"p":81,"r":421,"q":3.9},{"m":"Tata","c":"SUV","b":"LFP","k":"India","y":"2024","s":54.4,"p":108,"r":508,"q":4.2},{"m":"Tata","c":"SUV","b":"NMC","k":"India","y":"2025","s":57.8,"p":70,"r":483,"q":3.9},{"m":"Ford","c":"Truck","b":"NMC","k":"USA","y":"2023","s":43.7,"p":91,"r":448,"q":4.2},{"m":"Ford","c":"Truck","b":"NMC","k":"USA","y":"2024","s":48.9,"p":106,"r":397,"q":4.3},{"m":"Ford","c":"Truck","b":"LFP","k":"USA","y":"2025","s":60.8,"p":129,"r":448,"q":3.9},{"m":"Ford","c":"SUV","b":"NMC","k":"USA","y":"2023","s":43.3,"p":81,"r":441,"q":3.8},{"m":"Ford","c":"SUV","b":"LFP","k":"USA","y":"2024","s":50.8,"p":78,"r":535,"q":4.0},{"m":"Ford","c":"SUV","b":"LFP","k":"USA","y":"2025","s":56.9,"p":81,"r":404,"q":3.8},{"m":"Rivian","c":"Truck","b":"NMC","k":"USA","y":"2023","s":21.5,"p":120,"r":511,"q":4.1},{"m":"Rivian","c":"Truck","b":"NMC","k":"USA","y":"2024","s":28.4,"p":124,"r":506,"q":4.5},{"m":"Rivian","c":"Truck","b":"NMC","k":"USA","y":"2025","s":30.7,"p":111,"r":438,"q":4.1},{"m":"Rivian","c":"SUV","b":"NMC","k":"USA","y":"2023","s":26.1,"p":87,"r":503,"q":4.6},{"m":"Rivian","c":"SUV","b":"NMC","k":"USA","y":"2024","s":22.5,"p":75,"r":510,"q":4.0},{"m":"Rivian","c":"SUV","b":"NMC","k":"USA","y":"2025","s":29.9,"p":80,"r":553,"q":4.4},{"m":"Ola Electric","c":"Two-Wheeler","b":"NMC","k":"India","y":"2023","s":234.0,"p":2,"r":137,"q":3.7},{"m":"Ola Electric","c":"Two-Wheeler","b":"NMC","k":"India","y":"2024","s":417.8,"p":2,"r":111,"q":4.1},{"m":"Ola Electric","c":"Two-Wheeler","b":"LFP","k":"India","y":"2025","s":356.4,"p":5,"r":122,"q":3.6},{"m":"Ather","c":"Two-Wheeler","b":"NMC","k":"India","y":"2023","s":94.3,"p":2,"r":144,"q":4.0},{"m":"Ather","c":"Two-Wheeler","b":"NMC","k":"India","y":"2024","s":95.4,"p":2,"r":130,"q":4.1},{"m":"Ather","c":"Two-Wheeler","b":"NMC","k":"India","y":"2025","s":104.4,"p":5,"r":164,"q":4.4},{"m":"Yadea","c":"Two-Wheeler","b":"LFP","k":"China","y":"2023","s":395.7,"p":3,"r":172,"q":3.7},{"m":"Yadea","c":"Two-Wheeler","b":"LFP","k":"China","y":"2024","s":544.5,"p":3,"r":173,"q":4.2},{"m":"Yadea","c":"Two-Wheeler","b":"Sodium-Ion","k":"China","y":"2025","s":549.6,"p":3,"r":167,"q":3.8},{"m":"Yutong","c":"Bus","b":"LFP","k":"China","y":"2023","s":75.6,"p":315,"r":298,"q":4.2},{"m":"Yutong","c":"Bus","b":"LFP","k":"China","y":"2024","s":95.5,"p":267,"r":312,"q":3.9},{"m":"Yutong","c":"Bus","b":"LFP","k":"China","y":"2025","s":116.6,"p":334,"r":334,"q":3.9},{"m":"Toyota","c":"Sedan","b":"Solid-State","k":"Japan","y":"2023","s":18.8,"p":75,"r":537,"q":4.5},{"m":"Toyota","c":"Sedan","b":"NMC","k":"Japan","y":"2024","s":25.4,"p":84,"r":556,"q":4.1},{"m":"Toyota","c":"Sedan","b":"Solid-State","k":"Japan","y":"2025","s":26.1,"p":100,"r":627,"q":4.5},{"m":"Toyota","c":"SUV","b":"NMC","k":"Japan","y":"2023","s":16.5,"p":104,"r":477,"q":4.4},{"m":"Toyota","c":"SUV","b":"NMC","k":"Japan","y":"2024","s":18.7,"p":109,"r":425,"q":4.2},{"m":"Toyota","c":"SUV","b":"NMC","k":"Japan","y":"2025","s":29.8,"p":94,"r":518,"q":4.4}];
+const cats=["All",...new Set(D.map(d=>d.c))], yrs=["All",...new Set(D.map(d=>d.y))].sort();
+let sel="All",ysel="All";
+const sum=a=>a.reduce((x,y)=>x+y,0);
+function group(rows,key,fn,top,byKey){
+  const g={};rows.forEach(d=>(g[d[key]]??=[]).push(d));
+  let e=Object.entries(g).map(([k,v])=>[k,fn(v)]);
+  e.sort(byKey?(a,b)=>a[0].localeCompare(b[0]):(a,b)=>b[1]-a[1]);
+  return top?e.slice(0,top):e;
+}
+function bars(id,e,dec=0,suf=""){
+  const mx=Math.max(...e.map(x=>x[1]),1);
+  document.getElementById(id).innerHTML=e.map(([k,v])=>
+    `<div class="row"><span>${k}</span><div class="t"><div class="f" style="width:${v/mx*100}%"></div></div><span class="v">${v.toFixed(dec)}${suf}</span></div>`).join("");
+}
+function render(){
+  const byY=ysel==="All"?D:D.filter(d=>d.y===ysel);
+  const R=sel==="All"?byY:byY.filter(d=>d.c===sel);
+  const byC=sel==="All"?D:D.filter(d=>d.c===sel);
+  const tot=sum(R.map(d=>d.s));
+  const top=group(R,"m",v=>sum(v.map(d=>d.s)),1)[0];
+  const w=f=>sum(R.map(d=>f(d)*d.s))/tot;
+  document.getElementById("kpis").innerHTML=[
+    ["Total sales",Math.round(tot).toLocaleString()+"k"],["Top manufacturer",top[0]+" ("+Math.round(top[1]/tot*100)+"%)"],
+    ["Avg range",Math.round(w(d=>d.r))+" km"],["Avg battery",Math.round(w(d=>d.p))+" kWh"],["Avg rating",w(d=>d.q).toFixed(2)+" / 5"]
+  ].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+  bars("c1",group(byY,"c",v=>sum(v.map(d=>d.s))));
+  bars("c2",group(R,"m",v=>sum(v.map(d=>d.s))/tot*100,6),1,"%");
+  bars("c3",group(R,"b",v=>sum(v.map(d=>d.s))));
+  bars("c4",group(byY,"c",v=>sum(v.map(d=>d.r))/v.length));
+  bars("c5",group(R,"k",v=>sum(v.map(d=>d.s))));
+  bars("c6",group(byY,"c",v=>sum(v.map(d=>d.q))/v.length),2);
+  bars("c7",group(byC,"y",v=>sum(v.map(d=>d.s)),0,true));
+  bars("c8",group(byY,"c",v=>sum(v.map(d=>d.p))/v.length));
+}
+function filt(id,list,get,set){
+  const f=document.getElementById(id);
+  f.innerHTML=list.map(c=>`<button class="${c===get()?"on":""}" data-c="${c}">${c}</button>`).join("");
+  f.querySelectorAll("button").forEach(b=>b.onclick=()=>{set(b.dataset.c);draw()});
+}
+function draw(){filt("filters",cats,()=>sel,v=>sel=v);filt("yfilters",yrs,()=>ysel,v=>ysel=v);render()}
+draw();
+</script>
+</body>
+</html>
